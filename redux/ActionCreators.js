@@ -1,6 +1,8 @@
 import * as ActionTypes from "./ActionTypes";
 import { baseUrl } from "../shared/baseUrl";
 
+// * COMMENTS * //
+
 export const fetchComments = () => dispatch => {
   return fetch(baseUrl + "comments")
     .then(
@@ -34,6 +36,27 @@ export const addComments = comments => ({
   type: ActionTypes.ADD_COMMENTS,
   payload: comments
 });
+
+export const postComment = (dishId, rating, author, comment) => dispatch => {
+  const newComment = {
+    dishId: dishId,
+    rating: rating,
+    author: author,
+    comment: comment
+  };
+  newComment.date = new Date().toISOString();
+
+  setTimeout(() => {
+    dispatch(addComment(newComment));
+  }, 2000);
+};
+
+export const addComment = newComment => ({
+  type: ActionTypes.ADD_COMMENT,
+  payload: newComment
+});
+
+// * DISHES * //
 
 export const fetchDishes = () => dispatch => {
   dispatch(dishesLoading());
@@ -75,45 +98,20 @@ export const addDishes = dishes => ({
   payload: dishes
 });
 
-export const fetchPromos = () => dispatch => {
-  dispatch(promosLoading());
+// * FAVORITES * //
 
-  return fetch(baseUrl + "promotions")
-    .then(
-      response => {
-        if (response.ok) {
-          return response;
-        } else {
-          var error = new Error(
-            "Error " + response.status + ": " + response.statusText
-          );
-          error.response = response;
-          throw error;
-        }
-      },
-      error => {
-        var errmess = new Error(error.message);
-        throw errmess;
-      }
-    )
-    .then(response => response.json())
-    .then(promos => dispatch(addPromos(promos)))
-    .catch(error => dispatch(promosFailed(error.message)));
+export const postFavorite = dishId => dispatch => {
+  setTimeout(() => {
+    dispatch(addFavorite(dishId));
+  }, 2000);
 };
 
-export const promosLoading = () => ({
-  type: ActionTypes.PROMOS_LOADING
+export const addFavorite = dishId => ({
+  type: ActionTypes.ADD_FAVORITE,
+  payload: dishId
 });
 
-export const promosFailed = errmess => ({
-  type: ActionTypes.PROMOS_FAILED,
-  payload: errmess
-});
-
-export const addPromos = promos => ({
-  type: ActionTypes.ADD_PROMOS,
-  payload: promos
-});
+// * LEADERS * //
 
 export const fetchLeaders = () => dispatch => {
   dispatch(leadersLoading());
@@ -155,15 +153,44 @@ export const addLeaders = leaders => ({
   payload: leaders
 });
 
-export const postFavorite = (dishId)  => (dispatch) => {
+// * PROMOS * //
 
-  setTimeout(() => {
-      dispatch(addFavorite(dishId));
-  }, 2000);
+export const fetchPromos = () => dispatch => {
+  dispatch(promosLoading());
+
+  return fetch(baseUrl + "promotions")
+    .then(
+      response => {
+        if (response.ok) {
+          return response;
+        } else {
+          var error = new Error(
+            "Error " + response.status + ": " + response.statusText
+          );
+          error.response = response;
+          throw error;
+        }
+      },
+      error => {
+        var errmess = new Error(error.message);
+        throw errmess;
+      }
+    )
+    .then(response => response.json())
+    .then(promos => dispatch(addPromos(promos)))
+    .catch(error => dispatch(promosFailed(error.message)));
 };
 
+export const promosLoading = () => ({
+  type: ActionTypes.PROMOS_LOADING
+});
 
-export const addFavorite = (dishId) => ({
-  type: ActionTypes.ADD_FAVORITE,
-  payload: dishId
+export const promosFailed = errmess => ({
+  type: ActionTypes.PROMOS_FAILED,
+  payload: errmess
+});
+
+export const addPromos = promos => ({
+  type: ActionTypes.ADD_PROMOS,
+  payload: promos
 });
