@@ -73,6 +73,11 @@ function RenderDish(props) {
     else return false;
   };
 
+  const recognizeComment = ({ moveX, moveY, dx, dy }) => {
+    if (dx > -200) return true;
+    else return false;
+  };
+
   const panResponder = PanResponder.create({
     onStartShouldSetPanResponder: (e, gestureState) => {
       return true;
@@ -100,8 +105,11 @@ function RenderDish(props) {
           ],
           { cancelable: false }
         );
-
-      return true;
+      
+      else if (recognizeComment(gestureState))
+        props.onShowModal();
+      
+      else return true;
     },
     onPanResponderGrant: () => {
       this.view
