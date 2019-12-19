@@ -13,7 +13,9 @@ import {
   Text,
   ScrollView,
   Image,
-  StyleSheet
+  StyleSheet,
+  NetInfo,
+  ToastAndroid
 } from "react-native";
 import {
   createStackNavigator,
@@ -29,6 +31,11 @@ import {
   fetchPromos,
   fetchLeaders
 } from "../redux/ActionCreators";
+
+let toast;
+if (Platform.OS === "android") {
+  toast = require("ToastAndroid");
+}
 
 const mapStateToProps = state => {
   return {};
@@ -367,7 +374,60 @@ class Main extends Component {
     this.props.fetchComments();
     this.props.fetchPromos();
     this.props.fetchLeaders();
+
+    NetInfo.getConnectionInfo().then(connectionInfo => {
+      Platform.OS === "ios" // iOS
+        ? Alert.alert(
+            "Initial Network Connectivity Type:",
+            connectionInfo.type +
+              ", effectiveType: " +
+              connectionInfo.effectiveType
+          )
+        : toast.show(
+            "Initial Network Connectivity Type: " + // Android
+              connectionInfo.type +
+              ", effectiveType: " +
+              connectionInfo.effectiveType,
+            toast.LONG
+          );
+    });
+
+    NetInfo.addEventListener("connectionChange", this.handleConnectivityChange);
   }
+
+  componentWillUnmount() {
+    NetInfo.removeEventListener(
+      "connectionChange",
+      this.handleConnectivityChange
+    );
+  }
+
+  handleConnectivityChange = connectionInfo => {
+    switch (connectionInfo.type) {
+      case "none":
+        Platform.OS === "ios"
+          ? Alert.alert("Offline", "You are now offline!")
+          : toast.show("You are now offline!", toast.LONG);
+        break;
+      case "wifi":
+        Platform.OS === "ios"
+          ? Alert.alert("WiFi", "You are now connected to WiFi!")
+          : toast.show("You are now connected to WiFi!", toast.LONG);
+        break;
+      case "cellular":
+        Platform.OS === "ios"
+          ? Alert.alert("Cellular", "You are now connected to Cellular!")
+          : toast.show("You are now connected to Cellular!", toast.LONG);
+        break;
+      case "unknown":
+        Platform.OS === "ios"
+          ? Alert.alert("Unknown", "You now have unknown connection!")
+          : toast.show("You now have unknown connection!", toast.LONG);
+        break;
+      default:
+        break;
+    }
+  };
 
   render() {
     return (
